@@ -1,19 +1,35 @@
-# 🛍️ Online Store API (Java-Spark-For-Web-Apps)
+# 🛍️ Online Shopping Cart (Java-Spark-Mustache)
 
 ![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?style=for-the-badge&logo=openjdk)
 ![SparkJava](https://img.shields.io/badge/SparkJava-2.9.4-00B4F0?style=for-the-badge)
+![Mustache](https://img.shields.io/badge/Mustache.js-C1461C?style=for-the-badge&logo=mustache)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-3.8%2B-C71A36?style=for-the-badge&logo=apache-maven)
 ![Gson](https://img.shields.io/badge/Gson-2.10-4285F4?style=for-the-badge)
 
-A lightweight, microservice-style RESTful API for an online store, built with Java and the SparkJava framework. This project serves as the backend for managing store items, handling real-time updates, and more.
+A full-stack web application for an online store, built with Java. This project uses the **SparkJava** framework for the backend RESTful API, **MySQL** for data persistence, and **Mustache** templates for dynamic server-side rendering of the storefront and cart.
+
+---
 
 ## ✨ Features
 
-* **RESTful API:** Provides full CRUD (Create, Read, Update, Delete) endpoints for managing store items.
-* **MVC Architecture:** Organized in a clean Model-View-Controller pattern (`model`, `service`, `controller`) for maintainability.
-* **JSON Handling:** Uses **Gson** for fast and efficient serialization/deserialization of item data.
+* **Full-Stack MVC:** Organized in a clean Model-View-Controller pattern (`model`, `dao`, `service`, `controller`).
+* **RESTful API:** Provides full CRUD (Create, Read, Update, Delete) endpoints for managing products.
+* **Database Integration:** Uses **MySQL** (via MySQL Workbench) to persist product, user, and order data.
+* **Dynamic Rendering:** Implements **Mustache** templates to render web pages on the server side.
+* **JSON Handling:** Uses **Gson** for fast and efficient API serialization/deserialization.
 * **Logging:** Includes **Logback** for robust application logging.
-* **Real-time (Sprint 3):** Designed to support real-time price updates using WebSockets.
+* **Future (Sprint 3):** Designed to support real-time price updates using WebSockets.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend:** SparkJava (Web Framework), Java 11
+* **Frontend:** Mustache (Template Engine), HTML5, CSS3
+* **Database:** MySQL
+* **Dependency/Build:** Maven
+* **JSON Parsing:** Gson
 
 ---
 
@@ -23,10 +39,19 @@ A lightweight, microservice-style RESTful API for an online store, built with Ja
 
 * Java 11 (or higher)
 * Apache Maven 3.8 (or higher)
+* **MySQL Server** & **MySQL Workbench** (or any other SQL client)
 
 ---
 
-### 1. Run from your IDE (Recommended)
+### 1. Database Setup (Required)
+
+1.  Open MySQL Workbench and connect to your local database server.
+2.  Create a new schema for the project (e.g., `online_store`).
+3.  Run the `schema.sql` file (you'll need to create this) inside the new schema to create the `products`, `users`, and `cart` tables.
+4.  Navigate to the database configuration file in the project (e.g., `src/main/java/com/store/dao/Sql2oDao.java` or `config.properties`).
+5.  Update the database **URL**, **username**, and **password** to match your local MySQL setup.
+
+### 2. Run from your IDE (Recommended)
 
 1.  Clone this repository.
 2.  Open the project in your IDE (like IntelliJ or Eclipse) as a Maven project.
@@ -34,9 +59,7 @@ A lightweight, microservice-style RESTful API for an online store, built with Ja
 4.  Navigate to `src/main/java/com/store/Main.java`.
 5.  Right-click the file and select **"Run 'Main.main()'"**.
 
----
-
-### 2. Run from the Command Line
+### 3. Run from the Command Line
 
 1.  Clone the repository:
     ```bash
@@ -49,52 +72,32 @@ A lightweight, microservice-style RESTful API for an online store, built with Ja
     mvn compile exec:java -Dexec.mainClass="com.store.Main"
     ```
 
-The API will start and be accessible at `http://localhost:4567`.
+The application will start and be accessible at `http://localhost:4567`.
 
 ---
 
-### 3. Build an Executable JAR
+## 🗺️ App Endpoints (Sprint 2)
 
-1.  Package the application into a single "fat" JAR:
-    ```bash
-    mvn package
-    ```
-2.  Run the generated JAR file (located in the `target/` directory):
-    ```bash
-    java -jar target/online-store-api-1.0-SPRINT1.jar 
-    ```
-    *(Note: The exact JAR name may vary)*
+The application serves both dynamic web pages (rendered by Mustache) and a JSON API.
 
+### 💻 Web Pages (Server-Side Rendered)
 
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Renders the **Home Page** (shows all products). |
+| `GET` | `/products/:id` | Renders the **Product Detail Page** for a single item. |
+| `GET` | `/cart` | Renders the **Shopping Cart Page**. |
 
-## API Endpoints (Sprint 1)
-
-All endpoints run on `http://localhost:4567`.
+### 🗄️ JSON API (for internal use or future mobile app)
 
 | Method | Endpoint | Description | JSON Body (Example) |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/users` | Retrieves a list of all items. | N/A |
-| `GET` | `/users/:id` | Retrieves a single item by its ID. | N/A |
-| `POST` | `/users/:id` | Adds a new item with a specific ID. | `{"name":"Item Name", "description":"Details", "price":"9.99"}` |
-| `PUT` | `/users/:id` | Edits an existing item by its ID. | `{"name":"New Name", "description":"New Desc", "price":"10.99"}` |
-| `DELETE` | `/users/:id` | Deletes a specific item by its ID. | N/A |
-| `OPTIONS` | `/users/:id` | Checks if an item with the given ID exists. | N/A |
+| `GET` | `/api/products` | Retrieves a list of all products. | N/A |
+| `GET` | `/api/products/:id` | Retrieves a single product by its ID. | N/A |
+| `POST` | `/api/products` | Adds a new product. | `{"name":"Item Name", "price":9.99}` |
+| `PUT` | `/api/products/:id` | Edits an existing product by its ID. | `{"name":"New Name", "price":10.99}` |
+| `DELETE` | `/api/products/:id` | Deletes a specific product by its ID. | N/A |
+| `POST` | `/api/cart/add` | Adds a product to the cart. | `{"productId": 123, "quantity": 1}` |
+| `POST` | `/api/cart/remove` | Removes a product from the cart. | `{"productId": 123}` |
 
 ---
-
-## 📋 Project Backlog
-
-### Sprint 1: API Foundation & Resource Management
-* **Project Foundation Setup:** Initialize the API project with all required dependencies.
-* **User Data Retrieval:** Implement `GET /users` and `GET /users/:id` endpoints.
-* **User Data Management:** Implement `POST /users/:id` and `PUT /users/:id` endpoints.
-* **User Data Maintenance:** Implement `DELETE /users/:id` and `OPTIONS /users/:id`.
-* **Project Collaboration:** Set up the GitHub repository with clear documentation.
-
-### Sprint 3: Filtering & Real-Time Functionality
-* **Item Filtering:** Implement logic to filter the item list.
-* **Real-Time Price Visualization:** Implement a WebSocket for clients to see live price changes.
-* **Price Update Broadcasting:** Allow the system to push price changes to all connected clients.
-* **Sprint Quality Assurance:** Use a checklist to verify all new features meet quality criteria.
-* **Sprint Deliverable Deployment:** Update the GitHub repository with all Sprint 3 code.
-
