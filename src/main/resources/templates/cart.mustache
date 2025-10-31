@@ -1,0 +1,54 @@
+<!-- This content will be injected into layout.mustache -->
+{{< layout}}
+
+    {{$content}}
+<div class="page-title">
+    <h1>Your Shopping Cart</h1>
+</div>
+
+<div class="cart-layout">
+    <div class="cart-items-list">
+        <!-- Check if cartItems list is empty -->
+        {{#cartItems.isEmpty}}
+            <div class="cart-empty">
+                <p>Your cart is empty.</p>
+                <a href="/" class="btn btn-primary">Back to the main page</a>
+            </div>
+        {{/cartItems.isEmpty}}
+
+        <!-- Loop over items in the cart -->
+        {{^cartItems.isEmpty}}
+            {{#cartItems}}
+                <div class="cart-item-card">
+                    <img src="https://placehold.co/150x100/e2e8f0/334155?text={{name}}" alt="{{name}}" class="cart-item-img">
+                    <div class="cart-item-details">
+                        <h4 class="cart-item-title">{{name}}</h4>
+                        <p class="cart-item-price">{{getFormattedPrice}}</p>
+                    </div>
+                    <!-- Remove from Cart button -->
+                    <form action="/cart/remove/{{id}}" method="POST" class="cart-item-remove">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </div>
+            {{/cartItems}}
+        {{/cartItems.isEmpty}}
+    </div>
+
+    <!-- Cart Summary -->
+    {{^cartItems.isEmpty}}
+        <div class="cart-summary">
+            <h3>Order Resume</h3>
+            <div class="summary-row">
+                <span>Subtotal ({{cartCount}} items):</span>
+                <!-- We format the total in the controller -->
+                <strong>${{cartTotal}} USD</strong>
+            </div>
+            <button class="btn btn-primary btn-full">Pay</button>
+        </div>
+    {{/cartItems.isEmpty}}
+</div>
+    {{/content}}
+
+{{/layout}}

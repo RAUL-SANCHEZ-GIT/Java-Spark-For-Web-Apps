@@ -1,60 +1,87 @@
 package com.store;
 
-// Import your other classes
-import com.store.controller.UserController;
-import com.store.service.UserService;
-
+import com.store.controller.ItemsController;
+import com.store.controller.WebController;
+import com.store.service.ItemsService;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+
 import static spark.Spark.*;
+
 
 public class Main {
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
+    /**
+     * NEW: Creates and configures the database connection pool.
+     */
+    private static DataSource createDataSource() {
+        // TODO: Move credentials to environment variables
+        String dbUrl = "jdbc:mysql://localhost:3306/store_db";
+        String user = "root"; // <-- TODO: Change this to your MySQL username
+        String password = "HandsomeJack15$$."; // <-- TODO: Change this to your MySQL password
+
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl(dbUrl);
+        config.setUsername(user);
+        config.setPassword(password);
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+
+        logger.info("Initializing database connection pool...");
+        return new HikariDataSource(config);
+    }
+
     public static void main(String[] args) {
 
-        // 1. Initialize the service (data layer)
-        UserService userService = new UserService();
+        // 1. Initialize Database
+        DataSource dataSource = createDataSource();
 
-        // 2. Initialize the controller (http layer) and inject the service
-        UserController userController = new UserController(userService);
+        // 2. Initialize the service (data layer) with the database
+        ItemsService itemsService = new ItemsService(dataSource);
 
-        // 3. Configure Spark
+        // 3. Initialize the controllers and inject the service
+        ItemsController apiController = new ItemsController(itemsService);
+        WebController webController = new WebController(itemsService);
+
+        // 4. Configure Spark
         port(4567);
-        logger.info("API Service starting on port 4567...");
+        // NEW: Tell Spark where to find static files (CSS, JS, images)
+        staticFiles.location("/public");
+        logger.info("API and Web Service starting on port 4567...");
 
-        // 4. Define all routes and map them to controller methods
+        // 5. Define all WEB (HTML) routes
+        get("/", webController::renderShop);
+        get("/cart", webController::renderCart);
+        post("/cart/add/:id", webController::addToCart);
+        post("/cart/remove/:id", webController::removeFromCart);
 
-        // GET /users — Retrieve the list of all users
-        get("/users", userController::getAllUsers);
-
-        // GET /users/:id — Retrieve a user by the given ID
-        get("/users/:id", userController::getUserById);
-
-        // POST /users/:id — Add a user
-        post("/users/:id", userController::createUser);
-
-        // PUT /users/:id — Edit a specific user
-        put("/users/:id", userController::updateUser);
-
-        // OPTIONS /users/:id — Check whether a user with the given ID exists
-        options("/users/:id", userController::checkUser);
-
-        // DELETE /users/:id — Delete a specific user
-        delete("/users/:id", userController::deleteUser);
+        // 6. Define all API (JSON) routes (prefixed with /api)
+        // Note: We keep the old JSON API, but move it to /api
+        path("/api", () -> {
+            get("/items", apiController::getAllItems);
+            get("/items/:id", apiController::getItemById);
+            // Note: createItem in service was refactored, so controller needs update
+            // post("/items/:id", apiController::createItem);
+            // put("/items/:id", apiController::updateItem);
+            delete("/items/:id", apiController::deleteItem);
+            options("/items/:id", apiController::checkItem);
+        });
 
 
         // --- Filters & Exception Handling ---
-
-        // Log all requests
         before((req, res) -> {
             logger.info("{} request received for: {}", req.requestMethod(), req.pathInfo());
         });
 
-        // Set all responses to application/json by default
-        after((req, res) -> {
+        // Set API responses to application/json
+        after("/api/*", (req, res) -> {
             res.type("application/json");
         });
 
@@ -62,7 +89,12 @@ public class Main {
         exception(Exception.class, (exception, req, res) -> {
             logger.error("Internal Server Error: ", exception);
             res.status(500);
-            res.body("{\"error\": \"An internal server error occurred\"}");
+            // Don't send JSON errors to HTML web routes
+            if (!req.pathInfo().startsWith("/api")) {
+                res.body("<html><body><h1>500 Internal Server Error</h1><p>An error occurred.</p></body></html>");
+            } else {
+                res.body("{\"error\": \"An internal server error occurred\"}");
+            }
         });
     }
 }

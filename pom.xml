@@ -15,18 +15,42 @@
     </properties>
 
     <dependencies>
+        <!-- Spark Core -->
         <dependency>
             <groupId>com.sparkjava</groupId>
             <artifactId>spark-core</artifactId>
             <version>2.9.4</version>
         </dependency>
 
+        <!-- NEW: Spark Mustache Template Engine -->
+        <dependency>
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-template-mustache</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+
+        <!-- NEW: MySQL Database Connector -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- NEW: HikariCP Connection Pooling -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.0.1</version>
+        </dependency>
+
+        <!-- GSON for JSON API -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
 
+        <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -46,7 +70,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>com.yourproject.ApiService</mainClass>
+                    <!-- FIXED: Correct Main Class -->
+                    <mainClass>com.store.Main</mainClass>
                 </configuration>
             </plugin>
             <plugin>
@@ -62,7 +87,8 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.yourproject.ApiService</mainClass>
+                                    <!-- FIXED: Correct Main Class -->
+                                    <mainClass>com.store.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -72,5 +98,3 @@
         </plugins>
     </build>
 </project>
-
-
