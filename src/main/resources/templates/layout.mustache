@@ -11,15 +11,12 @@
 <header class="navbar">
     <div class="container">
         <a href="/" class="navbar-brand">Famous Shooping Items</a>
+
+        <form action="/" method="GET" class="nav-search-form">
+            <input type="text" name="query" placeholder="Search items..." class="nav-search-input">
+            <button type="submit" class="btn"><i class="fas fa-search"></i></button>
+        </form>
         <a href="/cart" class="nav-link cart-link">
-            <i class="fas fa-shopping-cart"></i>
-            Shopping Cart
-            {{#cartCount}}
-                <span class="cart-badge">{{cartCount}}</span>
-            {{/cartCount}}
-            {{^cartCount}}
-                <span class="cart-badge">0</span>
-            {{/cartCount}}
         </a>
     </div>
 </header>

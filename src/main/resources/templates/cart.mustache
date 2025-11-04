@@ -1,7 +1,7 @@
 <!-- This content will be injected into layout.mustache -->
 {{< layout}}
 
-    {{$content}}
+        {{$content}}
 <div class="page-title">
     <h1>Your Shopping Cart</h1>
 </div>
@@ -38,15 +38,15 @@
 
     <!-- Cart Summary -->
     {{^cartItems.isEmpty}}
-        <div class="cart-summary">
-            <h3>Order Resume</h3>
-            <div class="summary-row">
-                <span>Subtotal ({{cartCount}} items):</span>
-                <!-- We format the total in the controller -->
-                <strong>${{cartTotal}} USD</strong>
+        {{#cartItems}}
+            <div class="cart-item-card">
+                <img src="/images/{{image_url}}" alt="{{name}}" class="cart-item-img">
+                <div class="cart-item-details">
+                    <h4 class="cart-item-title">{{name}}</h4>
+                    <p class="cart-item-price">{{getFormattedPrice}}</p>
+                </div>
             </div>
-            <button class="btn btn-primary btn-full">Pay</button>
-        </div>
+        {{/cartItems}}
     {{/cartItems.isEmpty}}
 </div>
     {{/content}}

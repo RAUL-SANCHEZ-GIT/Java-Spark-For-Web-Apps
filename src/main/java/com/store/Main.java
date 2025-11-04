@@ -20,6 +20,8 @@ public class Main {
     /**
      * NEW: Creates and configures the database connection pool.
      */
+
+
     private static DataSource createDataSource() {
         // TODO: Move credentials to environment variables
         String dbUrl = "jdbc:mysql://localhost:3306/store_db";

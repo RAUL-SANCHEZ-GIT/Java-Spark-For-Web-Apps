@@ -2,6 +2,7 @@
 
 ![Java](https://img.shields.io/badge/Java-11%2B-ED8B00?style=for-the-badge&logo=openjdk)
 ![SparkJava](https://img.shields.io/badge/SparkJava-2.9.4-00B4F0?style=for-the-badge)
+![WebSocket](https://img.shields.io/badge/WebSocket-Real--Time-blue?style=for-the-badge&logo=websocket)
 ![Mustache](https://img.shields.io/badge/Mustache.js-C1461C?style=for-the-badge&logo=mustache)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Maven](https://img.shields.io/badge/Maven-3.8%2B-C71A36?style=for-the-badge&logo=apache-maven)
@@ -14,19 +15,21 @@ A full-stack web application for an online store, built with Java. This project 
 ## ✨ Features
 
 * **Full-Stack MVC:** Organized in a clean Model-View-Controller pattern (`model`, `dao`, `service`, `controller`).
+* **Real-Time Price Updates:** Uses **WebSockets** to broadcast price changes to all connected clients instantly.
+* **Item Filtering:** Allows users to search for products directly from the home page.
+* **Dynamic Rendering:** Implements **Mustache** templates to render web pages on the server side.
+* **Static File Serving:** Serves static assets like CSS and product images from the `resources/public` directory.
 * **RESTful API:** Provides full CRUD (Create, Read, Update, Delete) endpoints for managing products.
 * **Database Integration:** Uses **MySQL** (via MySQL Workbench) to persist product, user, and order data.
-* **Dynamic Rendering:** Implements **Mustache** templates to render web pages on the server side.
 * **JSON Handling:** Uses **Gson** for fast and efficient API serialization/deserialization.
 * **Logging:** Includes **Logback** for robust application logging.
-* **Future (Sprint 3):** Designed to support real-time price updates using WebSockets.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Backend:** SparkJava (Web Framework), Java 11
-* **Frontend:** Mustache (Template Engine), HTML5, CSS3
+* **Backend:** SparkJava (Web Framework & WebSockets), Java 11
+* **Frontend:** Mustache (Template Engine), HTML5, CSS3, JavaScript (for WebSocket client)
 * **Database:** MySQL
 * **Dependency/Build:** Maven
 * **JSON Parsing:** Gson
@@ -48,10 +51,18 @@ A full-stack web application for an online store, built with Java. This project 
 1.  Open MySQL Workbench and connect to your local database server.
 2.  Create a new schema for the project (e.g., `online_store`).
 3.  Run the `schema.sql` file (you'll need to create this) inside the new schema to create the `products`, `users`, and `cart` tables.
+    * **Note:** Ensure your `products` (or `items`) table has a column for the image file name (e.g., `image_url VARCHAR(255)`).
 4.  Navigate to the database configuration file in the project (e.g., `src/main/java/com/store/dao/Sql2oDao.java` or `config.properties`).
 5.  Update the database **URL**, **username**, and **password** to match your local MySQL setup.
 
-### 2. Run from your IDE (Recommended)
+### 2. Static File Setup
+
+1.  Place all static assets (e.g., `style.css`, images) in the `src/main/resources/public` directory.
+2.  Create an `images` subfolder: `src/main/resources/public/images`.
+3.  Add your product images to this folder (e.g., `item1.jpg`, `item2.jpg`).
+4.  Update your database records so the `image_url` column matches the file names.
+
+### 3. Run from your IDE (Recommended)
 
 1.  Clone this repository.
 2.  Open the project in your IDE (like IntelliJ or Eclipse) as a Maven project.
@@ -59,7 +70,7 @@ A full-stack web application for an online store, built with Java. This project 
 4.  Navigate to `src/main/java/com/store/Main.java`.
 5.  Right-click the file and select **"Run 'Main.main()'"**.
 
-### 3. Run from the Command Line
+### 4. Run from the Command Line
 
 1.  Clone the repository:
     ```bash
@@ -76,17 +87,19 @@ The application will start and be accessible at `http://localhost:4567`.
 
 ---
 
-## 🗺️ App Endpoints (Sprint 2)
+## 🗺️ App Endpoints
 
-The application serves both dynamic web pages (rendered by Mustache) and a JSON API.
+The application serves dynamic web pages, a JSON API, and a WebSocket connection.
 
 ### 💻 Web Pages (Server-Side Rendered)
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/` | Renders the **Home Page** (shows all products). |
+| `GET` | `/` | Renders the **Home Page**. Shows all products, or filters by a search term (e.g., `/?query=guitarra`). |
 | `GET` | `/products/:id` | Renders the **Product Detail Page** for a single item. |
 | `GET` | `/cart` | Renders the **Shopping Cart Page**. |
+| `POST` | `/cart/add/:id` | Adds an item to the cart. |
+| `POST` | `/cart/remove/:id` | Removes an item from the cart. |
 
 ### 🗄️ JSON API (for internal use or future mobile app)
 
@@ -100,4 +113,8 @@ The application serves both dynamic web pages (rendered by Mustache) and a JSON 
 | `POST` | `/api/cart/add` | Adds a product to the cart. | `{"productId": 123, "quantity": 1}` |
 | `POST` | `/api/cart/remove` | Removes a product from the cart. | `{"productId": 123}` |
 
----
+### ⚡ WebSocket (Real-Time)
+
+| Endpoint | Direction | Message (JSON) | Description |
+| :--- | :--- | :--- | :--- |
+| `/price-updates` | `Server -> Client` | `{"itemId":"item1", "newPrice":"650.00"}` | Broadcasts a price change for a specific item to all connected clients. |
