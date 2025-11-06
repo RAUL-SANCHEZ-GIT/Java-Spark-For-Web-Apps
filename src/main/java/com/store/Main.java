@@ -1,6 +1,7 @@
 package com.store;
 
 import com.store.controller.ItemsController;
+import com.store.controller.PriceWebSocketHandler;
 import com.store.controller.WebController;
 import com.store.service.ItemsService;
 import com.zaxxer.hikari.HikariConfig;
@@ -14,6 +15,7 @@ import static spark.Spark.*;
 
 
 public class Main {
+
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
@@ -42,6 +44,7 @@ public class Main {
 
     public static void main(String[] args) {
 
+        webSocket("/price-updates", PriceWebSocketHandler.class);
         // 1. Initialize Database
         DataSource dataSource = createDataSource();
 
@@ -60,18 +63,14 @@ public class Main {
 
         // 5. Define all WEB (HTML) routes
         get("/", webController::renderShop);
-        get("/cart", webController::renderCart);
-        post("/cart/add/:id", webController::addToCart);
-        post("/cart/remove/:id", webController::removeFromCart);
-
+        post("/bid/:id", webController::placeBid);
         // 6. Define all API (JSON) routes (prefixed with /api)
         // Note: We keep the old JSON API, but move it to /api
         path("/api", () -> {
             get("/items", apiController::getAllItems);
             get("/items/:id", apiController::getItemById);
-            // Note: createItem in service was refactored, so controller needs update
-            // post("/items/:id", apiController::createItem);
-            // put("/items/:id", apiController::updateItem);
+            post("/items", apiController::createItem); // Use createItem
+            put("/items/:id", apiController::updateItem); // Use updateItem
             delete("/items/:id", apiController::deleteItem);
             options("/items/:id", apiController::checkItem);
         });

@@ -1,23 +1,39 @@
 {{< layout}}
 
-    {{$content}}
-        <div class="page-title">
-            <h1>Latest Products</h1>
-            <p>Exclusive Items From Your Favorite Artists.</p>
-        </div>
+{{$content}}
+    <div class="page-title">
+        <h1>Latest Products</h1>
+        <p>Exclusive Items From Your Favorite Artists.</p>
+    </div>
 
-        <div class="item-grid">
-            {{#items}}
-                <div class="item-card">
-                    <div class="item-card-image">
-                        <img src="/images/{{image_url}}" alt="{{name}}">
-                    </div>
-                    <div class="item-card-content">
-                    </div>
+    <div class="item-grid">
+        {{#items}}
+            <div class="item-card">
+                <div class="item-card-image">
+                    <img src="/images/{{image_url}}" alt="{{name}}">
                 </div>
-            {{/items}}
-        </div>
+                <div class="item-card-content">
+                    <h4 class="item-title">{{name}}</h4>
+                    <p class="item-price" data-item-id="{{id}}">{{getFormattedPrice}}</p>
 
-    {{/content}}
+                    <form action="/bid/{{id}}" method="POST" class="bid-form">
+                        <div class="bid-input-group">
+                            <span>$</span>
+                            <input type="number" name="bidAmount"
+                                   step="0.01" min="{{getPrice}}"
+                                   placeholder="{{getPrice}}" class="bid-input" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Place Bid</button>
+                    </form>
+                </div>
+            </div>
+        {{/items}}
+
+        {{^items}}
+            <p>No items found matching your search.</p>
+        {{/items}}
+    </div>
+
+{{/content}}
 
 {{/layout}}

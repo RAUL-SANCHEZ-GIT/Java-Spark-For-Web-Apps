@@ -1,4 +1,4 @@
-<!-- This content will be injected into layout.mustache -->
+
 {{< layout}}
 
         {{$content}}
@@ -8,7 +8,6 @@
 
 <div class="cart-layout">
     <div class="cart-items-list">
-        <!-- Check if cartItems list is empty -->
         {{#cartItems.isEmpty}}
             <div class="cart-empty">
                 <p>Your cart is empty.</p>
@@ -16,37 +15,34 @@
             </div>
         {{/cartItems.isEmpty}}
 
-        <!-- Loop over items in the cart -->
         {{^cartItems.isEmpty}}
             {{#cartItems}}
                 <div class="cart-item-card">
-                    <img src="https://placehold.co/150x100/e2e8f0/334155?text={{name}}" alt="{{name}}" class="cart-item-img">
+                  <img src="/images/{{image_url}}" alt="{{name}}" class="cart-item-img">
                     <div class="cart-item-details">
                         <h4 class="cart-item-title">{{name}}</h4>
                         <p class="cart-item-price">{{getFormattedPrice}}</p>
                     </div>
-                    <!-- Remove from Cart button -->
-                    <form action="/cart/remove/{{id}}" method="POST" class="cart-item-remove">
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </form>
+
+                   <form action="/cart/remove/{{id}}" method="POST" class="cart-item-remove">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i>
+                       </button>
+                </form>
                 </div>
             {{/cartItems}}
         {{/cartItems.isEmpty}}
     </div>
 
-    <!-- Cart Summary -->
     {{^cartItems.isEmpty}}
-        {{#cartItems}}
-            <div class="cart-item-card">
-                <img src="/images/{{image_url}}" alt="{{name}}" class="cart-item-img">
-                <div class="cart-item-details">
-                    <h4 class="cart-item-title">{{name}}</h4>
-                    <p class="cart-item-price">{{getFormattedPrice}}</p>
-                </div>
+        <div class="cart-summary">
+            <h3>Summary</h3>
+            <div class="summary-row">
+                <span>Subtotal ({{cartCount}} items)</span>
+                <span class="summary-total">${{cartTotal}}</span>
             </div>
-        {{/cartItems}}
+            <button class="btn btn-primary btn-full">Proceed to Checkout</button>
+        </div>
     {{/cartItems.isEmpty}}
 </div>
     {{/content}}

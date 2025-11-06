@@ -13,9 +13,10 @@
         <a href="/" class="navbar-brand">Famous Shooping Items</a>
 
         <form action="/" method="GET" class="nav-search-form">
-            <input type="text" name="query" placeholder="Search items..." class="nav-search-input">
+            <input type="text" name="query" placeholder="Search items..." class="nav-search-input" value="{{query}}">
             <button type="submit" class="btn"><i class="fas fa-search"></i></button>
-        </form>
+            </form>
+
         <a href="/cart" class="nav-link cart-link">
         </a>
     </div>
@@ -31,5 +32,69 @@
         <p>&copy; 2025 Famous Shop Raul Michell Sanchez Morales. All reserved rights.</p>
     </div>
 </footer>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Connect to the WebSocket
+        // It connects to the same host/port, but uses "ws://" protocol
+        let wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+        let ws = new WebSocket(wsProtocol + window.location.host + "/price-updates");
+
+        ws.onopen = function() {
+            console.log("WebSocket connected!");
+        };
+
+        ws.onmessage = function(event) {
+            console.log("Received data: " + event.data);
+
+            try {
+                // Parse the JSON message from the server
+                let data = JSON.parse(event.data);
+
+                if (data.itemId && data.newPrice) {
+                    // Find the item's price element on the page
+                    // This uses the "data-item-id" we added to index.mustache
+                    let priceElement = document.querySelector(`.item-price[data-item-id="${data.itemId}"]`);
+
+                    if (priceElement) {
+                        // Format the price as currency (e.g., $899.99)
+                        let formattedPrice = new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: 'USD'
+                        }).format(data.newPrice);
+
+                        // Update the text!
+                        priceElement.textContent = formattedPrice;
+
+                        // Add a simple animation to highlight the change
+                        priceElement.style.transition = 'none';
+                        priceElement.style.color = '#4ade80'; // Green
+                        priceElement.style.transform = 'scale(1.1)';
+
+                        setTimeout(() => {
+                            priceElement.style.transition = 'color 0.5s, transform 0.5s';
+                            priceElement.style.color = ''; // Back to default
+                            priceElement.style.transform = ''; // Back to default
+                        }, 100);
+                    }
+                }
+            } catch (e) {
+                console.error("Failed to parse WebSocket message", e);
+            }
+        };
+
+        ws.onclose = function() {
+            console.log("WebSocket disconnected. Attempting to reconnect...");
+            // Simple auto-reconnect
+            setTimeout(() => {
+                 // Re-run the DOMContentLoaded logic to reconnect
+                 // In a real app, you'd just re-init the WebSocket
+            }, 5000);
+        };
+
+        ws.onerror = function(err) {
+            console.error("WebSocket error: ", err);
+        };
+    });
+</script>
 </body>
 </html>

@@ -30,27 +30,42 @@ public class ItemsService {
                 rs.getString("id"),
                 rs.getString("name"),
                 rs.getString("description"),
-                rs.getDouble("price")
+                rs.getDouble("price"),
+                rs.getString("image_url")
         );
     }
 
     /**
      * UPDATED: Now queries the database
      */
-    public Collection<Items> getAllItems() {
+    public Collection<Items> getItems(String query) {
         List<Items> items = new ArrayList<>();
+        // Start with base SQL
         String sql = "SELECT * FROM items";
+        boolean hasQuery = query != null && !query.trim().isEmpty();
 
-        // Use try-with-resources to auto-close connections
+        // Add filter logic if query exists
+        if (hasQuery) {
+            sql += " WHERE name LIKE ? OR description LIKE ?";
+        }
+
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
-                items.add(mapRowToItem(rs));
+            // Set query parameters if they exist
+            if (hasQuery) {
+                String likeQuery = "%" + query + "%";
+                ps.setString(1, likeQuery);
+                ps.setString(2, likeQuery);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    items.add(mapRowToItem(rs));
+                }
             }
         } catch (SQLException e) {
-            logger.error("Error fetching all items", e);
+            logger.error("Error fetching items with query: " + query, e);
         }
         return items;
     }
@@ -80,9 +95,8 @@ public class ItemsService {
      * UPDATED: Now inserts into the database
      */
     public Items createItem(Items item) {
-        // Use the item's ID if provided, otherwise the DB might have an auto-increment
-        // Our current design requires an ID from the client.
-        String sql = "INSERT INTO items (id, name, description, price) VALUES (?, ?, ?, ?)";
+        // FIXED: Added image_url to the query
+        String sql = "INSERT INTO items (id, name, description, price, image_url) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -91,13 +105,13 @@ public class ItemsService {
             ps.setString(2, item.getName());
             ps.setString(3, item.getDescription());
             ps.setDouble(4, item.getPrice());
+            ps.setString(5, item.getImage_url()); // This is now correct
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
                 return item;
             }
         } catch (SQLException e) {
-            // Log a 23505 (unique constraint violation) differently?
             logger.error("Error creating item", e);
         }
         return null; // Failed to create
@@ -107,7 +121,8 @@ public class ItemsService {
      * UPDATED: Now updates the database
      */
     public Items updateItem(String id, Items item) {
-        String sql = "UPDATE items SET name = ?, description = ?, price = ? WHERE id = ?";
+        // FIXED: Added image_url = ? to the query
+        String sql = "UPDATE items SET name = ?, description = ?, price = ?, image_url = ? WHERE id = ?";
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -115,11 +130,12 @@ public class ItemsService {
             ps.setString(1, item.getName());
             ps.setString(2, item.getDescription());
             ps.setDouble(3, item.getPrice());
-            ps.setString(4, id); // WHERE clause
+            ps.setString(4, item.getImage_url()); // This is now parameter 4
+            ps.setString(5, id); // This is now parameter 5
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected > 0) {
-                item.setId(id); // Ensure the ID is set on the returned object
+                item.setId(id);
                 return item;
             }
         } catch (SQLException e) {
@@ -151,5 +167,32 @@ public class ItemsService {
      */
     public boolean itemExists(String id) {
         return getItemById(id) != null;
+    }
+    /**
+     * Attempts to place a new bid on an item.
+     *
+     * @param id           The ID of the item to bid on.
+     * @param newBidAmount The amount of the new bid.
+     * @return true if the bid was successful, false otherwise (e.g., bid was not high enough).
+     */
+    public boolean placeBid(String id, double newBidAmount) {
+        Items item = getItemById(id);
+        if (item == null) {
+            logger.warn("Bid placed on non-existent item: {}", id);
+            return false;
+        }
+
+        // Check if the new bid is higher than the current price (current bid)
+        if (newBidAmount > item.getPrice()) {
+            // Update the item's price to the new bid amount
+            item.setPrice(newBidAmount);
+
+            // Use our existing updateItem method to save the new price to the DB
+            Items updatedItem = updateItem(id, item);
+            return updatedItem != null;
+        }
+
+        // Bid was not high enough
+        return false;
     }
 }

@@ -17,7 +17,12 @@ public class ItemsController {
 
     public String getAllItems(Request req, Response res) {
         res.type("application/json");
-        return gson.toJson(itemsService.getAllItems());
+
+        // 1. Get the optional "query" parameter from the request URL
+        String query = req.queryParams("query");
+
+        // 2. Pass the query (which can be null) to the new service method
+        return gson.toJson(itemsService.getItems(query));
     }
 
     public String getItemById(Request req, Response res) {
@@ -117,4 +122,16 @@ public class ItemsController {
             return "Item not found";
         }
     }
+
+    // Example: Add this to ItemsController.java to test
+    public String updatePrice(Request req, Response res) {
+        String id = req.params(":id");
+        String price = req.queryParams("price"); // e.g., "899.99"
+
+        PriceWebSocketHandler.broadcastPriceUpdate(id, price);
+
+        res.type("application/json");
+        return gson.toJson("Price update broadcasted for " + id);
+    }
+
 }

@@ -319,3 +319,75 @@ main.container {
         grid-template-columns: 1fr; /* Stack cart items and summary */
     }
 }
+
+/* --- Navbar Search --- */
+.nav-search-form {
+    display: flex;
+    flex-grow: 1; /* Allows search to fill space */
+    max-width: 500px;
+    margin: 0 20px;
+}
+
+.nav-search-input {
+    width: 100%;
+    padding: 10px 16px;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    outline: none;
+}
+.nav-search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+/* Style the search button to attach to the input */
+.nav-search-form .btn {
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    /* Use a subtle-er color */
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    border: 1px solid var(--border-color);
+}
+.nav-search-form .btn:hover {
+    background-color: #e9ecef;
+}
+
+
+/* --- New Bid Form --- */
+.bid-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bid-input-group {
+    display: flex;
+    align-items: center;
+}
+
+.bid-input-group span {
+    padding: 10px 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    background-color: var(--light-color);
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    color: var(--secondary-color);
+}
+
+.bid-input {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    box-sizing: border-box; /* Important for width */
+}
+.bid-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
